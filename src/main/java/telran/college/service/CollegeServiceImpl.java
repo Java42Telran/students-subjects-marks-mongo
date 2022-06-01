@@ -70,8 +70,9 @@ public class CollegeServiceImpl implements CollegeService {
 
 	@Override
 	public List<Integer> getStudentMarksSubject(String name, String subjectName) {
-		// TODO Auto-generated method stub
-		return null;
+		StudentMarksProj marks = studentsRepository.findByNameAndMarksSubject(name, subjectName);
+		LOG.debug("marks from getStudentMarksSubject : {} of student {}",  marks, name);
+		return marks.getMarks().stream().filter(sm -> sm.getSubject().equals(subjectName)).map(SubjectMark::getMark).toList();
 	}
 
 	@Override

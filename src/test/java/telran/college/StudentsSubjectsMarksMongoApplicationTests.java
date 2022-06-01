@@ -27,17 +27,23 @@ class StudentsSubjectsMarksMongoApplicationTests {
 		collegeService.addMark(new Mark(2, 1, 75));
 		collegeService.addMark(new Mark(2, 1, 80));
 		collegeService.addMark(new Mark(3, 1, 60));
+		
 		collegeService.addMark(new Mark(4, 2, 65));
 		collegeService.addMark(new Mark(5, 3, 70));
 		
 	}
-//	@Test
-//	@Order(2)
-//	void getMarksStudentSubjectTest() {
-//		List<Integer> expected = Arrays.asList(70, 80, 90);
-//		List<Integer> actual = collegeService.getStudentMarksSubject("student1", "subject1");
-//		assertIterableEquals(expected, actual);
-//	}
+	@Test
+	@Order(2)
+	void getMarksStudentSubjectTest() {
+		List<Integer> expected = Arrays.asList(70, 80, 90);
+		List<Integer> actual = collegeService.getStudentMarksSubject("student1", "subject1");
+		
+		assertIterableEquals(expected, actual);
+		collegeService.addMark(new Mark(3, 2, 60));
+		expected = Arrays.asList(60);
+		actual = collegeService.getStudentMarksSubject("student3", "subject1");
+		assertIterableEquals(expected, actual);
+	}
 	@Test
 	@Order(3)
 	void getStudentsSubjectMarks() {

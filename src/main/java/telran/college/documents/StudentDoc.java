@@ -25,6 +25,8 @@ public class StudentDoc {
 	public String toString() {
 		return "StudentDoc [id=" + id + ", name=" + name + ", marks=" + marks + "]";
 	}
-	
+	List<Integer> getMarksMark(String subjectName) {
+		return marks.stream().filter(m -> m.getSubject().equals(subjectName)).map(SubjectMark::getMark).toList();
+	}
 	
 }
