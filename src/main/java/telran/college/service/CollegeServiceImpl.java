@@ -70,6 +70,7 @@ public class CollegeServiceImpl implements CollegeService {
 
 	@Override
 	public List<Integer> getStudentMarksSubject(String name, String subjectName) {
+		//TODO think of another implementation based on Aggregation Framework
 		StudentMarksProj marks = studentsRepository.findByNameAndMarksSubject(name, subjectName);
 		LOG.debug("marks from getStudentMarksSubject : {} of student {}",  marks, name);
 		return marks.getMarks().stream().filter(sm -> sm.getSubject().equals(subjectName)).map(SubjectMark::getMark).toList();
@@ -77,14 +78,14 @@ public class CollegeServiceImpl implements CollegeService {
 
 	@Override
 	public List<Student> goodCollegeStudents() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return studentsRepository.findGoodStudents();
 	}
 
 	@Override
 	public List<Student> bestStudents(int nStudents) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return studentsRepository.findTopBestStudents(nStudents);
 	}
 
 	@Override

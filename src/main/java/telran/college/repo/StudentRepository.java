@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 import telran.college.documents.StudentDoc;
 import telran.college.projection.*;
 
-public interface StudentRepository extends MongoRepository<StudentDoc, Long> {
+public interface StudentRepository extends MongoRepository<StudentDoc, Long>, StudentAggregationRepository {
 //@Query(value="{'marks.subject': ?0, 'marks.mark': {$gte: ?1}}", fields = "{name: 1}")
 	List<StudentNameProj> findByMarksSubjectAndMarksMarkGreaterThanEqual(String subjectName, int mark);
 //@Query(value = "{'name': ?0, 'marks.subject': ?1}", fields = "{'marks': 1}")

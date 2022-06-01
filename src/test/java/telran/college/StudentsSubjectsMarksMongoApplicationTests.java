@@ -51,13 +51,13 @@ class StudentsSubjectsMarksMongoApplicationTests {
 		List<String> actual = collegeService.getStudentsSubjectMark("subject1", 70);
 		assertIterableEquals(expected, actual);
 	}
-//	@Test
-//	@Order(4)
-//	void getGoodStudents() {
-//		List<Student> expected = Arrays.asList(new Student(1, "student1"), new Student(2, "student2"));
-//		List<Student> actual = collegeService.goodCollegeStudents();
-//		assertIterableEquals(expected, actual);
-//	}
+	@Test
+	@Order(4)
+	void getGoodStudents() {
+		List<Student> expected = Arrays.asList(new Student(1, "student1"), new Student(2, "student2"));
+		List<Student> actual = collegeService.goodCollegeStudents();
+		assertIterableEquals(expected, actual);
+	}
 //	@Test
 //	@Order(14)
 //	void deleteStudents() {
@@ -82,13 +82,13 @@ class StudentsSubjectsMarksMongoApplicationTests {
 //		
 //		assertIterableEquals(expected, actual);
 //	}
-//	@Test
-//	@Order(5)
-//	void bestStudents() {
-//		List<Student> expected = Arrays.asList(new Student(1, "student1"));
-//		List<Student> actual = collegeService.bestStudents(1);
-//		assertIterableEquals(expected, actual);
-//	}
+	@Test
+	@Order(5)
+	void bestStudents() {
+		List<Student> expected = Arrays.asList(new Student(1, "student1"));
+		List<Student> actual = collegeService.bestStudents(1);
+		assertIterableEquals(expected, actual);
+	}
 //	@Test
 //	@Order (7)
 //	void studentsAllMarksSubjectGreaterEqual () {
