@@ -14,4 +14,8 @@ public interface StudentRepository extends MongoRepository<StudentDoc, Long>, St
 //@Query(value = "{'name': ?0, 'marks.subject': ?1}", fields = "{'marks': 1}")
 StudentMarksProj findByNameAndMarksSubject(String name, String subjectName);
 
+@Query(value="{'marks.subject': ?1, marks: {$not: {$elemMatch: {subject: ?1, mark: {$lt: ?0}}}}}", fields="{name: 1}")
+List<StudentDoc> findStdentsAllMarksSubjectGreater(int mark, String subject);
+
+
 }

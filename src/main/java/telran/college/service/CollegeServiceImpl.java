@@ -85,55 +85,73 @@ public class CollegeServiceImpl implements CollegeService {
 	@Override
 	public List<Student> bestStudents(int nStudents) {
 		
-		return studentsRepository.findTopBestStudents(nStudents);
+		return studentsRepository.findTopBestStudents(nStudents, null);
 	}
 
 	@Override
 	public List<Student> bestStudentsSubject(int nStudents, String subjectName) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return studentsRepository.findTopBestStudents(nStudents, subjectName);
 	}
 
 	@Override
 	public Subject subjectGreatestAvgMark() {
-		// TODO Auto-generated method stub
-		return null;
+		String subjectName = studentsRepository.findSubjectGreatestAvgMark();
+		return toSubjectFromDoc(subjectsRepository.findBySubjectName(subjectName));
 	}
+
+	
 
 	@Override
 	public List<Subject> subjectsAvgMarkGreater(int avgMark) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> subjectNames = studentsRepository.findSubjectsAvgMarkGreater(avgMark);
+		List<SubjectDoc> subjectDocs = subjectsRepository.findBySubjectNameIn(subjectNames);
+		return subjectDocs.stream().map(this::toSubjectFromDoc).toList();
+	}
+private Subject toSubjectFromDoc(SubjectDoc subjectDoc) {
+		
+		return new Subject(subjectDoc.getId(), subjectDoc.getSubjectName());
 	}
 
 	@Override
 	public void deleteStudentsAvgMarkLess(int avgMark) {
-		// TODO Auto-generated method stub
+		List<Long> ids = studentsRepository.findStudentIdsAvgMarkLess(avgMark);
+		LOG.debug("Deleted student id's with avgMark less than {} : {}", avgMark, ids);
+		studentsRepository.deleteAllById(ids);
 
 	}
 
 	@Override
 	public List<Student> deleteStudentsMarksCountLess(int count) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Student> studentsForDelete = studentsRepository.findStudentsMarksCountLess(count);
+		List<Long> ids = studentsForDelete.stream().map(s -> s.id).toList();
+		LOG.debug("Deleted student id's with marks count less than {} : {}", count, ids);
+		studentsRepository.deleteAllById(ids);
+		return studentsForDelete;
 	}
 
 	@Override
 	public List<Student> getStudentsAllMarksSubject(int mark, String subject) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return studentsRepository.findStdentsAllMarksSubjectGreater(mark, subject)
+				.stream().map(this::toStudentFromDoc).toList();
 	}
 
 	@Override
 	public List<Student> getStudentsMaxMarksCount() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return studentsRepository.findStudentsMaxMarks();
 	}
 
 	@Override
 	public List<Subject> getSubjectsAvgMarkLess(int avgMark) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> subjectNames = studentsRepository.findSubjectsAvgMarkGreater(avgMark);
+		List<SubjectDoc> subjectDocs = subjectsRepository.findBySubjectNameNotIn(subjectNames);
+		return subjectDocs.stream().map(this::toSubjectFromDoc).toList();
+	}
+	private Student toStudentFromDoc(StudentDoc studentDoc) {
+		return new Student(studentDoc.getId(), studentDoc.getName());
+		
 	}
 
 }

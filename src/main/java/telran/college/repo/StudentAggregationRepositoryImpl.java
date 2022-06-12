@@ -13,22 +13,28 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import org.springframework.stereotype.Repository;
 
+
 import telran.college.documents.StudentDoc;
-import telran.college.dto.Student;
+import telran.college.dto.*;
 @Repository
 public class StudentAggregationRepositoryImpl implements StudentAggregationRepository {
 private static final String AVG_MARK_FIELD = "avgMark";
+private static final String COUNT_FIELD = "count";
 @Autowired
 	MongoTemplate mongoTemplate;
 	@Override
-	public List<Student> findTopBestStudents(int nStudents) {
-		UnwindOperation unwindOperation = unwind("marks");
-		GroupOperation groupOperation = group("id", "name").avg("marks.mark").as(AVG_MARK_FIELD);
-		SortOperation sortOperation = sort(Direction.DESC, AVG_MARK_FIELD );
-		LimitOperation limitOperation = limit(nStudents);
-		ProjectionOperation projectionOperation = project().andExclude(AVG_MARK_FIELD);
-		Aggregation aggregation = newAggregation(unwindOperation, groupOperation, sortOperation,
-				limitOperation, projectionOperation);
+	public List<Student> findTopBestStudents(int nStudents, String subjectName) {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks"));
+		if (subjectName != null) {
+			operations.add(match(Criteria.where("marks.subject").is(subjectName)));
+		}
+		
+		operations.add(group("id", "name").avg("marks.mark").as(AVG_MARK_FIELD)) ;
+		operations.add(sort(Direction.DESC, AVG_MARK_FIELD) );
+		operations.add(limit(nStudents));
+		operations.add(project().andExclude(AVG_MARK_FIELD));
+		Aggregation aggregation = newAggregation(operations);
 		var documents = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class);
 		return getStudentsResult(documents);
 	}
@@ -59,6 +65,82 @@ private static final String AVG_MARK_FIELD = "avgMark";
 		var document = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class)
 				.getUniqueMappedResult();
 		return document.getDouble(AVG_MARK_FIELD);
+	}
+	@Override
+	public String findSubjectGreatestAvgMark() {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks"));
+		operations.add(group("marks.subject").avg("marks.mark").as(AVG_MARK_FIELD));
+		operations.add(sort(Direction.DESC, AVG_MARK_FIELD));
+		operations.add(limit(1));
+		operations.add(project().andExclude(AVG_MARK_FIELD));
+		Aggregation aggregation = newAggregation(operations);
+		var document = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class)
+				.getUniqueMappedResult();
+		
+		
+		return document.getString("_id");
+	}
+	@Override
+	public List<String> findSubjectsAvgMarkGreater(double avgMark) {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks"));
+		operations.add(group("marks.subject").avg("marks.mark").as(AVG_MARK_FIELD));
+		operations.add(match(Criteria.where(AVG_MARK_FIELD).gte(avgMark)));
+		operations.add(project().andExclude(AVG_MARK_FIELD));
+		Aggregation aggregation = newAggregation(operations);
+		var documents = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class)
+				.getMappedResults();
+		
+		
+		return documents.stream().map(d -> d.getString("_id")).toList();
+	}
+	@Override
+	public List<Student> findStudentsMaxMarks() {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks"));
+		operations.add(group("id", "name").count().as(COUNT_FIELD)) ;
+		operations.add(match(Criteria.where(COUNT_FIELD).is(getMaxCount())));
+		operations.add(project().andExclude(COUNT_FIELD));
+		Aggregation aggregation = newAggregation(operations);
+		var documents = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class);
+		return getStudentsResult(documents);
+	}
+	private int getMaxCount() {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks"));
+		operations.add(group("id").count().as(COUNT_FIELD)) ;
+		operations.add(sort(Direction.DESC, COUNT_FIELD));
+		operations.add(limit(1));
+		Aggregation aggregation = newAggregation(operations);
+		var document = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class)
+				.getUniqueMappedResult();
+		
+		return document.getInteger(COUNT_FIELD);
+	}
+	@Override
+	public List<Long> findStudentIdsAvgMarkLess(double avgMark) {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks", true));
+		operations.add(group("id").avg("marks.mark").as(AVG_MARK_FIELD));
+		operations.add(match(new Criteria()
+				.orOperator(Criteria.where(AVG_MARK_FIELD).isNull(),
+						Criteria.where(AVG_MARK_FIELD).lt(avgMark))));
+		operations.add(project().andExclude(AVG_MARK_FIELD));
+		var documents = mongoTemplate.aggregate(newAggregation(operations), StudentDoc.class,
+				Document.class).getMappedResults();
+		return documents.stream().map(d -> d.getLong("_id")).toList();
+	}
+	@Override
+	public List<Student> findStudentsMarksCountLess(int count) {
+		ArrayList<AggregationOperation> operations = new ArrayList<>();
+		operations.add(unwind("marks", true));
+		operations.add(group("id", "name").count().as(COUNT_FIELD)) ;
+		operations.add(match(Criteria.where(COUNT_FIELD).lt(count)));
+		operations.add(project().andExclude(COUNT_FIELD));
+		Aggregation aggregation = newAggregation(operations);
+		var documents = mongoTemplate.aggregate(aggregation, StudentDoc.class, Document.class);
+		return getStudentsResult(documents);
 	}
 	
 
